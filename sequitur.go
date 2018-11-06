@@ -19,11 +19,12 @@ func tokenize(in string) (out string) {
 }
 
 func nextToken(in string, index int) (string, int) {
-	if index+1 >= len(in) {
-		if index+1 == len(in) {
-			return string(in[index]), -1
-		}
+	if index >= len(in) {
 		return "", -1
+	}
+
+	if index+1 == len(in) {
+		return string(in[index]), -1
 	}
 
 	if in[index] == '^' {
@@ -85,10 +86,18 @@ func main() {
 				if subToken != "" {
 					if subToken == token {
 						outstring += newKey
-						if token[0] == '^' {
-							subIndex += 2
+						if subToken[0] == '^' {
+							if len(subToken) == 4 {
+								subIndex += 2
+							} else {
+								subIndex++
+							}
 						} else {
-							subIndex++
+							if subToken[1] == '^' {
+								subIndex += 2
+							} else {
+								subIndex++
+							}
 						}
 					} else {
 						if subToken[0] == '^' {
@@ -101,6 +110,7 @@ func main() {
 			}
 
 			input = outstring
+			//fmt.Println("-> ", newKey, ":", token, "\n", input)
 			dict = make(map[string]struct{})
 			fullDict[newKey] = token
 			index = 0
@@ -111,6 +121,39 @@ func main() {
 		//fmt.Println(token + " : " + strconv.Itoa(index))
 		token, index = nextToken(input, index)
 	}
+
+	// Enforce rule utility
+
+	/*
+		Loop1:
+			for {
+			Loop2:
+				for key, val := range fullDict {
+					tk1, inx1 := nextToken(input, 0)
+					for inx1 != -1 {
+						if tk1 != "" {
+							if tk1 == key {
+								continue Loop2
+							}
+						}
+						tk1, inx1 = nextToken(input, inx1)
+					}
+
+					for skey, sval := range fullDict {
+						tk1, inx1 := nextToken(sval, 0)
+						for inx1 != -1 {
+							if tk1 != "" {
+								if tk1 == key {
+									continue Loop2
+								}
+							}
+						}
+					}
+					continue Loop1
+				}
+				break
+			}
+	*/
 
 	fmt.Println("Output: " + input)
 	for key, val := range fullDict {
